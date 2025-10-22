@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quranic Surah Study Tool</title>
-    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Custom styles for Inter font and general appearance */
@@ -14,7 +13,7 @@
         /* Pecan/Old Paper Background and Black Text */
         body {
             background-color: #f9f0e1; /* Light Pecan/Old Paper */
-            color: #1a1a1a; /* Very dark grey, close to black */
+            color: #000000; /* Strictly Black */
         }
         #app-container {
             background-color: #fcf8f3; /* Slightly lighter paper color for the card */
@@ -27,14 +26,34 @@
             line-height: 3.5rem; 
             direction: rtl; 
         }
-        /* Ensure all primary text is black-like */
-        .text-default {
-            color: #1a1a1a;
+        /* Ensure all primary text is strictly black */
+        .text-default,
+        h1, h2, h3, h4,
+        p, span, div {
+            color: #000000 !important;
         }
-        /* Override Tailwind's default gray text in the list */
+        /* Override Tailwind's default gray and indigo text in the list */
         #list-container button {
-            color: #1a1a1a !important;
+            color: #000000 !important;
             background-color: #fcf8f3;
+        }
+        /* Style for the active/hover buttons to use black and paper contrast */
+        #list-container button:hover, 
+        #list-container button.active-surah {
+            background-color: #e5e5e5 !important; /* A light gray/darker paper for contrast */
+            color: #000000 !important;
+            border-color: #333333 !important;
+        }
+        .text-indigo-700, .text-indigo-900, .border-indigo-500, .bg-indigo-600, .hover\:bg-indigo-700 {
+            color: #000000 !important;
+            border-color: #000000 !important;
+            background-color: transparent !important; /* Ensure no indigo backgrounds remain */
+        }
+        .text-indigo-700.font-bold, .text-indigo-900.font-extrabold {
+            font-weight: bold;
+        }
+        .shadow-lg, .shadow-md {
+            box-shadow: none !important; /* Remove colored shadows for a plainer look */
         }
     </style>
     <script>
@@ -57,46 +76,23 @@
 
     <div id="app-container" class="max-w-7xl mx-auto shadow-2xl rounded-xl overflow-hidden flex flex-col lg:flex-row">
 
-        <!-- Left Panel: Surah Index -->
         <div class="lg:w-1/4 w-full border-b lg:border-r lg:border-b-0 bg-paper-light p-4 flex flex-col">
-            <h2 class="text-2xl font-extrabold text-indigo-700 mb-4 pb-2 border-b border-gray-300">Short Surahs Index (13 Verses or Less)</h2>
+            <h2 class="text-2xl font-extrabold mb-4 pb-2 border-b border-gray-300">Short Surahs Index (13 Verses or Less)</h2>
             
-            <!-- List of Surahs (Scrollable) -->
             <div id="list-container" class="overflow-y-auto flex-grow max-h-[40vh] lg:max-h-full">
-                <!-- List items will be injected here -->
-            </div>
+                </div>
         </div>
 
-        <!-- Right Panel: Surah Detail and AI Assistant -->
         <div class="lg:w-3/4 w-full flex flex-col">
             
-            <!-- Surah Detail View -->
-            <div id="detail-container" class="p-6 lg:p-8 overflow-y-auto flex-grow max-h-[50vh] lg:max-h-[60vh] border-b border-gray-300">
-                <h1 class="text-3xl lg:text-4xl font-extrabold text-indigo-900 mb-6" id="detail-title">Select a Surah to Study</h1>
+            <div id="detail-container" class="p-6 lg:p-8 overflow-y-auto flex-grow max-h-full">
+                <h1 class="text-3xl lg:text-4xl font-extrabold mb-6" id="detail-title">Select a Surah to Study</h1>
                 <div id="detail-content" class="space-y-8 text-default">
                     <p class="italic">Select a Surah from the index on the left to view its complete Arabic text, English summary, translation, and transliteration.</p>
                 </div>
             </div>
 
-            <!-- AI Asking Tool / Chat Component -->
-            <div class="p-6 lg:p-8 bg-pecan border-t border-gray-300">
-                <h2 class="text-2xl font-bold text-indigo-700 mb-4">AI Study Assistant</h2>
-                <div id="chat-output" class="bg-white p-4 rounded-lg h-32 overflow-y-auto mb-4 border border-indigo-200 shadow-inner text-sm space-y-2 text-default">
-                    <div class="text-gray-500">Ask the AI any question about the selected Surah, its context, meaning, or Islamic history.</div>
-                </div>
-                
-                <div class="flex gap-2">
-                    <input type="text" id="user-query-input" placeholder="Ask a question about the Surah..." 
-                           class="flex-grow p-3 border border-gray-400 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 shadow-sm text-default"
-                           onkeydown="if(event.key === 'Enter') document.getElementById('send-query-btn').click()">
-                    <button id="send-query-btn" onclick="sendQuery()" 
-                            class="bg-indigo-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-indigo-700 transition duration-200 disabled:opacity-50"
-                            disabled>
-                        Ask
-                    </button>
-                </div>
             </div>
-        </div>
     </div>
 
     <script>
@@ -106,17 +102,17 @@
             { id: 93, title: "Ad-Duha (The Morning Hours)", verse_count: 11, arabic_text: "وَٱلضُّحَىٰ (1) وَٱلَّيْلِ إِذَا سَجَىٰ (2) مَا وَدَّعَكَ رَبُّكَ وَمَا قَلَىٰ (3) وَلَلْـَٔاخِرَةُ خَيْرٌ لَّكَ مِنَ ٱلْأُولَىٰ (4) وَلَسَوْفَ يُعْطِيكَ رَبُّكَ فَتَرْضَىٰٓ (5) أَلَمْ يَجِدْكَ يَتِيمًا فَـَٔاوَىٰ (6) وَوَجَدَكَ ضَآلًّا فَهَدَىٰ (7) وَوَجَدَكَ عَائِلًا فَأَغْنَىٰ (8) فَأَمَّا ٱلْيَتِيمَ فَلَا تَقْهَرْ (9) وَأَمَّا ٱلسَّآئِلَ فَلَا تَنْهَرْ (10) وَأَمَّا بِنِعْمَةِ رَبِّكَ فَحَدِّثْ (11)", summary: "Ad-Duha was revealed to reassure the Prophet Muhammad (peace be upon him) during a period of distress. God affirms He has not abandoned him, promises him a better future, and reminds him of the blessings of protection, guidance, and provision He bestowed upon him, instructing him to treat orphans and those who ask with kindness.", translation: "1. By the morning brightness, 2. And [by] the night when it covers with darkness, 3. Your Lord has not taken leave of you, [O Muhammad], nor has He detested [you]. 4. And the Hereafter is better for you than the first [life]. 5. And your Lord is going to give you, and you will be satisfied. 6. Did He not find you an orphan and give [you] refuge? 7. And He found you lost and guided [you], 8. And He found you poor and made [you] self-sufficient. 9. So as for the orphan, do not oppress [him]. 10. And as for the petitioner, do not repel [him]. 11. But as for the favor of your Lord, recite and report.", transliteration: "1. Waḍ-ḍuḥā. 2. Wal-layli idhā sajā. 3. Mā wadda'aka Rabbuka wa mā qalā. 4. Wa lal-ākhiratu khayrul laka minal-ūlā. 5. Wa lasawfa yu'ṭīka Rabbuka fatarḍā. 6. 'Alam yajidka yatīman fa-āwā. 7. Wa wajadaka ḍāllan fahadā. 8. Wa wajadaka 'ā'ilan fa-'aghnā. 9. Fa-'ammal-yatīma falā taqhar. 10. Wa 'ammas-sā'ila falā tanhar. 11. Wa 'ammā bini'mati Rabbika faḥaddith."},
             { id: 94, title: "Ash-Sharh (The Relief)", verse_count: 8, arabic_text: "أَلَمْ نَشْرَحْ لَكَ صَدْرَكَ (1) وَوَضَعْنَا عَنكَ وِزْرَكَ (2) ٱلَّذِىٓ أَنقَضَ ظَهْرَكَ (3) وَرَفَعْنَا لَكَ ذِكْرَكَ (4) فَإِنَّ مَعَ ٱلْعُسْرِ يُسْرًا (5) إِنَّ مَعَ ٱلْعُسْرِ يُسْرًا (6) فَإِذَا فَرَغْتَ فَٱنصَبْ (7) وَإِلَىٰ رَبِّكَ فَٱرْغَب (8)", summary: "Ash-Sharh is a message of comfort, assuring the Prophet Muhammad (peace be upon him) that God has eased his burden, exalted his mention, and fundamentally established the principle that relief and ease always accompany hardship.", translation: "1. Did We not expand for you, [O Muḥammad], your breast? 2. And We removed from you your burden, 3. Which had weighed upon your back? 4. And We raised for you your mention. 5. For indeed, with hardship [will be] ease. 6. Indeed, with hardship [will be] ease. 7. So when you have finished [from your immediate duties], then stand up [for worship]. 8. And to your Lord direct [your] longing.", transliteration: "1. 'Alam nashraḥ laka ṣadrak. 2. Wa waḍa'nā 'anka wizrak. 3. Alladhī 'anqaḍa ẓahrak. 4. Wa rafa'nā laka dhikrak. 5. Fa-'inna ma'al-'usri yusrā. 6. 'Inna ma'al-'usri yusrā. 7. Fa-'idhā faraghta fanṣab. 8. Wa 'ilā Rabbika farghab."},
             { id: 95, title: "At-Tin (The Fig)", verse_count: 8, arabic_text: "وَٱلتِّينِ وَٱلزَّيْتُونِ (1) وَطُورِ سِينِينَ (2) وَهَٰذَا ٱلْبَلَدِ ٱلْأَمِينِ (3) لَقَدْ خَلَقْنَا ٱلْإِنسَٰنَ فِىٓ أَحْسَنِ تَقْوِيمٍ (4) ثُمَّ رَدَدْنَٰهُ أَسْفَلَ سَٰفِلِينَ (5) إِلَّا ٱلَّذِينَ ءَامَنُوا۟ وَعَمِلُوا۟ ٱلصَّٰلِحَٰتِ فَلَهُمْ أَجْرٌ غَيْرُ مَمْنُونٍ (6) فَمَا يُكَذِّبُكَ بَعْدُ بِٱلدِّينِ (7) أَلَيْسَ ٱللَّهُ بِأَحْكَمِ ٱلْحَٰكِمِينَ (8)", summary: "God swears by noble places associated with revelation (the Fig, the Olive, Mount Sinai, and Mecca) to affirm that He created mankind in the best shape, but only faith and good deeds can maintain that high status and prevent them from being relegated to the lowest of the low.", translation: "1. By the fig and the olive 2. And [by] Mount Sinai 3. And [by] this city of security [Makkah], 4. We have certainly created man in the best of stature; 5. Then We return him to the lowest of the low, 6. Except for those who believe and do righteous deeds, for they will have a reward uninterrupted. 7. So what yet causes you to deny the Recompense? 8. Is not Allah the most just of judges?", transliteration: "1. Wat-tīni waz-zaytūn. 2. Wa ṭūri Sīnīn. 3. Wa hādhal-baladil-amīn. 4. Laqad khalaqnal-'insāna fī 'aḥsani taqwīm. 5. Thumma radadnāhu 'asfala sāfilīn. 6. 'Illal-ladhīna 'āmanū wa 'amiluṣ-ṣāliḥāti falahum 'ajrun ghayru mamnūn. 7. Famā yukadhdhibuka ba'du bid-dīn. 8. 'Alaysallāhu bi'aḥkamil-ḥākimīn."},
-            { id: 97, title: "Al-Qadr (The Power)", verse_count: 5, arabic_text: "إِنَّآ أَنزَلْنَٰهُ فِى لَيْلَةِ ٱلْقَدْرِ (1) وَمَآ أَدْرَىٰكَ مَا لَيْلَةُ ٱلْقَدْرِ (2) لَيْلَةُ ٱلْقَدْرِ خَيْرٌ مِّنْ أَلْفِ شَهْرٍ (3) تَنَزَّلُ ٱلْمَلَٰٓئِكَةُ وَٱلرُّوحُ فِيهَا بِإِذْنِ رَبِّهِم مِّن كُلِّ أَمْرٍۢ (4) سَلَٰمٌ هِىَ حَتَّىٰ مَطْلَعِ ٱلْفَجْرِ (5)", summary: "Al-Qadr describes the immense virtue and spiritual power of the 'Night of Decree' (Laylatul Qadr), the night when the Quran was first revealed. God declares that worship on this single night is better than worship over a thousand months.", translation: "1. Indeed, We sent the Qur'ān down during the Night of Decree. 2. But what can make you know what is the Night of Decree? 3. The Night of Decree is better than a thousand months. 4. The angels and the Spirit descend therein by permission of their Lord for every matter. 5. Peace it is until the emergence of dawn.", transliteration: "1. 'Innā 'anzalnāhu fī laylatil-qadr. 2. Wa mā 'adrāka mā laylatul-qadr. 3. Laylatul-qadri khayrum min 'alfi shahr. 4. Tanazzalul-malā'ikatu war-rūḥu fīhā bi'idhni Rabbihim min kulli 'amr. 5. Salāmun hiya ḥattā maṭla'il-fajr."},
+            { id: 97, title: "Al-Qadr (The Power)", verse_count: 5, arabic_text: "إِنَّآ أَنزَلْنَٰهُ فِى لَيْلَةِ ٱلْقَدْرِ (1) وَمَآ أَدْرَىٰكَ مَا لَيْلَةُ ٱلْقَدْرِ (2) لَيْلَةُ ٱلْقَدْرِ خَيْرٌ مِّنْ أَلْفِ شَهْرٍ (3) تَنَزَّلُ ٱٱلْمَلَٰٓئِكَةُ وَٱلرُّوحُ فِيهَا بِإِذْنِ رَبِّهِم مِّن كُلِّ أَمْرٍۢ (4) سَلَٰمٌ هِىَ حَتَّىٰ مَطْلَعِ ٱلْفَجْرِ (5)", summary: "Al-Qadr describes the immense virtue and spiritual power of the 'Night of Decree' (Laylatul Qadr), the night when the Quran was first revealed. God declares that worship on this single night is better than worship over a thousand months.", translation: "1. Indeed, We sent the Qur'ān down during the Night of Decree. 2. But what can make you know what is the Night of Decree? 3. The Night of Decree is better than a thousand months. 4. The angels and the Spirit descend therein by permission of their Lord for every matter. 5. Peace it is until the emergence of dawn.", transliteration: "1. 'Innā 'anzalnāhu fī laylatil-qadr. 2. Wa mā 'adrāka mā laylatul-qadr. 3. Laylatul-qadri khayrum min 'alfi shahr. 4. Tanazzalul-malā'ikatu war-rūḥu fīhā bi'idhni Rabbihim min kulli 'amr. 5. Salāmun hiya ḥattā maṭla'il-fajr."},
             { id: 98, title: "Al-Bayyinah (The Clear Proof)", verse_count: 8, arabic_text: "لَمْ يَكُنِ ٱلَّذِينَ كَفَرُوا۟ مِنْ أَهْلِ ٱلْكِتَٰبِ وَٱلْمُشْرِكِينَ مُنفَكِّينَ حَتَّىٰ تَأْتِيَهُمُ ٱلْبَيِّنَةُ (1) رَسُولٌ مِّنَ ٱللَّهِ يَتْلُوا۟ صُحُفًا مُّطَهَّرَةً (2) فِيهَا كُتُبٌ قَيِّمَةٌ (3) وَمَا تَفَرَّقَ ٱلَّذِينَ أُوتُوا۟ ٱلْكِتَٰبَ إِلَّا مِنۢ بَعْدِ مَا جَآءَتْهُمُ ٱلْبَيِّنَةُ (4) وَمَآ أُمِرُوٓا۟ إِلَّا لِيَعْبُدُوا۟ ٱللَّهَ مُخْلِصِينَ لَهُ ٱلدِّينَ حُنَفَآءَ وَيُقِيمُوا۟ ٱلصَّلَوٰةَ وَيُؤْتُوا۟ ٱلزَّكَوٰةَ ۚ وَذَٰلِكَ دِينُ ٱلْقَيِّمَةِ (5) إِنَّ ٱلَّذِينَ كَفَرُوا۟ مِنْ أَهْلِ ٱلْكِتَٰبِ وَٱلْمُشْرِكِينَ فِى نَارِ جَهَنَّمَ خَٰلِدِينَ فِيهَآ ۚ أُو۟لَٰٓئِكَ هُمْ شَرُّ ٱلْبَرِيَّةِ (6) إِنَّ ٱلَّذِينَ ءَامَنُوا۟ وَعَمِلُوا۟ ٱلصَّٰلِحَٰتِ أُو۟لَٰٓئِكَ هُمْ خَيْرُ ٱلْبَرِيَّةِ (7) جَزَآؤُهُمْ عِندَ رَبِّهِمْ جَنَّٰتُ عَدْنٍ تَجْرِى مِن تَحْتِهَا ٱلْأَنْهَٰرُ خَٰلِدِينَ فِيهَآ أَبَدًا ۖ رَّضِىَ ٱللَّهُ عَنْهُمْ وَرَضُوا۟ عَنْهُ ۚ ذَٰلِكَ لِمَنْ خَشِىَ رَبَّهُۥ (8)", summary: "Al-Bayyinah states that the disbelievers would not abandon their ways until the clear proof (the Prophet Muhammad and the Quran) arrived. It defines the core tenets of the true religion—worshipping God sincerely, establishing prayer, and giving zakat—and contrasts the terrible fate of the disbelievers with the eternal reward of believers.", translation: "1. Those who disbelieved among the People of the Scripture and the polytheists were not to be parted [from disbelief] until there came to them the clear evidence - 2. A Messenger from Allah, reciting purified scrolls 3. Within which are correct writings. 4. Nor did those who were given the Scripture become divided until after there had come to them the clear evidence. 5. And they were not commanded except to worship Allah, [being] sincerely obedient to Him, inclining to truth, and to establish prayer and give zakāh. And that is the correct religion. 6. Indeed, those who disbelieved among the People of the Scripture and the polytheists will be in the fire of Hell, abiding eternally therein. Those are the worst of creatures. 7. Indeed, those who believed and did righteous deeds - those are the best of creatures. 8. Their reward with their Lord will be gardens of perpetuity beneath which rivers flow, wherein they will abide forever, Allah being pleased with them and they with Him. That is for whoever has feared his Lord.", transliteration: "1. Lam yakunilladhīna kafarū min 'ahlil-kitābi wal-mushrikīna munfakkīna ḥattā ta'tiyahumul-bayyinah. 2. Rasūlum minallāhi yatlū ṣuḥufam muṭahharah. 3. Fīhā kutubun qayyimah. 4. Wa mā tafarraqalladhīna 'ūtul-kitāba 'illā mim ba'di mā jā'athumul-bayyinah. 5. Wa mā 'umirū 'illā liya'budullāha mukhliṣīna lahuddīna ḥunafā'a wa yuqīmuṣ-ṣalāta wa yu'tuz-zakāh; wa dhālika dīnul-qayyimah. 6. 'Innalladhīna kafarū min 'ahlil-kitābi wal-mushrikīna fī nāri Jahannama khālidīna fīhā; 'ulā'ika hum sharrul-bariyyah. 7. 'Innalladhīna 'āmanū wa 'amiluṣ-ṣāliḥāti 'ulā'ika hum khayrul-bariyyah. 8. Jazā'uhum 'inda Rabbihim jannātu 'adnin tajrī min taḥtihal-'anhāru khālidīna fīhā 'abadā; raḍiyallāhu 'anhum wa raḍū 'anh; dhālika liman khashiya Rabbah."},
             { id: 99, title: "Az-Zalzalah (The Earthquake)", verse_count: 8, arabic_text: "إِذَا زُلْزِلَتِ ٱلْأَرْضُ زِلْزَالَهَا (1) وَأَخْرَجَتِ ٱلْأَرْضُ أَثْقَالَهَا (2) وَقَالَ ٱلْإِنسَٰنُ مَا لَهَا (3) يَوْمَئِذٍۢ تُحَدِّثُ أَخْبَارَهَا (4) بِأَنَّ رَبَّكَ أَوْحَىٰ لَهَا (5) يَوْمَئِذٍۢ يَصْدُرُ ٱلنَّاسُ أَشْتَاتًا لِّيُرَوْا۟ أَعْمَٰلَهُمْ (6) فَمَن يَعْمَلْ مِثْقَالَ ذَرَّةٍ خَيْرًا يَرَهُۥ (7) وَمَن يَعْمَلْ مِثْقَالَ ذَرَّةٍۢ شَرًّا يَرَهُۥ (8)", summary: "Az-Zalzalah vividly describes the great earthquake that will signal the Day of Judgment. The earth will disclose all its secrets, and mankind will be separated into groups to be shown the results of their deeds, emphasizing that even the smallest good or evil act will be accounted for.", translation: "1. When the earth is shaken with its [final] earthquake 2. And the earth discharges its burdens 3. And man says, 'What is [wrong] with it?'— 4. That Day, it will report its news 5. Because your Lord has commanded it. 6. That Day, the people will depart separated [into categories] to be shown [the result of] their deeds. 7. So whoever does an atom's weight of good will see it, 8. And whoever does an atom's weight of evil will see it.", transliteration: "1. 'Idhā zulzilatil-'arḍu zilzālahā. 2. Wa 'akhrajatil-'arḍu 'athqālahā. 3. Wa qālal-'insānu mā lahā. 4. Yawma'idhin tuḥaddithu 'akhbārahā. 5. Bi-'anna Rabbaka 'awḥá lahā. 6. Yawma'idhin yaṣdurun-nāsu 'ashtātal liyuraw 'a'mālahum. 7. Faman ya'mal mithqāla dharratin khayray yarah. 8. Wa man ya'mal mithqāla dharratin sharray yarah."},
             { id: 100, title: "Al-Adiyat (The Chargers)", verse_count: 11, arabic_text: "وَٱلْعَٰدِيَٰتِ ضَبْحًا (1) فَٱلْمُورِيَٰتِ قَدْحًا (2) فَٱلْمُغِيرَٰتِ صُبْحًا (3) فَأَثَرْنَ بِهِۦ نَقْعًا (4) فَوَسَطْنَ بِهِۦ جَمْعًا (5) إِنَّ ٱلْإِنسَٰنَ لِرَبِّهِۦ لَكَنُودٌ (6) وَإِنَّهُۥ عَلَىٰ ذَٰلِكَ لَشَهِيدٌ (7) وَإِنَّهُۥ لِحُبِّ ٱلْخَيْرِ لَشَدِيدٌ (8) أَفَلَا يَعْلَمُ إِذَا بُعْثِرَ مَا فِى ٱلْقُبُورِ (9) وَحُصِّلَ مَا فِى ٱلصُّدُورِ (10) إِنَّ رَبَّهُم بِهِمْ يَوْمَئِذٍۢ لَّخَبِيرٌۢ (11)", summary: "Al-Adiyat begins with an oath by charging horses in battle to highlight man's nature. It criticizes mankind's ingratitude towards their Lord, their intense love for wealth, and warns them of the Day when what is in the graves and in the hearts will be brought forth and accounted for.", translation: "1. By the snorting chargers, 2. And those [horses] striking sparks of fire [with their hooves], 3. And those who make [an attack] at morning, 4. And stir up thereby [clouds of] dust, 5. And penetrate thereby into the center [of the foe] 6. Indeed, man is to his Lord ungrateful. 7. And indeed, he is to that a witness. 8. And indeed, for the love of wealth is he intensely greedy. 9. But does he not know that when the contents of the graves are scattered 10. And that within the breasts is obtained? 11. Indeed, their Lord is, on that Day, acquainted with them.", transliteration: "1. Wal-'ādiyāti ḍabḥā. 2. Fal-mūriyāti qadḥā. 3. Fal-mughīrāti ṣubḥā. 4. Fa-'atharna bihi naq'ā. 5. Fawa-saṭna bihi jam'ā. 6. Innal-'insāna li-Rabbihī lakanūd. 7. Wa 'innahu 'alā dhālika lashahīd. 8. Wa 'innahu liḥubbil-khayri lashadīd. 9. 'Afa lā ya'lamu 'idhā bu'thira mā fil-qubūr. 10. Wa ḥuṣṣila mā fiṣ-ṣudūr. 11. 'Inna Rabbahum bihim yawma'idhin la-khabīr."},
-            { id: 101, title: "Al-Qari'ah (The Striking Calamity)", verse_count: 11, arabic_text: "ٱلْقَارِعَةُ (1) مَا ٱلْقَارِعَةُ (2) وَمَآ أَدْرَىٰكَ مَا ٱلْقَارِعَةُ (3) يَوْمَ يَكُونُ ٱلنَّاسُ كَٱلْفَرَاشِ ٱلْمَبْثُوثِ (4) وَتَكُونُ ٱلْجِبَالُ كَٱلْعِهْنِ ٱلْمَنفُوشِ (5) فَأَمَّا مَن ثَقُلَتْ مَوَٰزِينُهُۥ (6) فَهُوَ فِى عِيشَةٍۢ رَّاضِيَةٍۢ (7) وَأَمَّا مَنْ خَفَّتْ مَوَٰزِينُهُۥ (8) فَأُمُّهُۥ هَاوِيَةٌ (9) وَمَآ أَدْرَىٰكَ مَا هِيَهْ (10) نَارٌ حَامِيَةٌۢ (11)", summary: "Al-Qari'ah focuses entirely on the Day of Judgment, describing the terrifying sound and spectacle of the 'Striking Calamity.' It details how people will be scattered like moths and mountains like wool, and confirms that the fate of every soul will be determined by the heaviness or lightness of their scale of deeds.", translation: "1. The Striking Calamity - 2. What is the Striking Calamity? 3. And what can make you know what is the Striking Calamity? 4. It is the Day when people will be like scattered moths 5. And the mountains will be like carded wool. 6. Then as for he whose scales are heavy [with good deeds], 7. He will be in a pleasing life. 8. But as for he whose scales are light, 9. His refuge will be an abyss. 10. And what can make you know what that is? 11. It is a Fire, intensely hot.", transliteration: "1. Al-Qāri'ah. 2. Mal-Qāri'ah. 3. Wa mā 'adrāka mal-Qāri'ah. 4. Yawma yakūnun-nāsu kal-farāshil-mabthūth. 5. Wa takūnul-jibālu kal-'ihnil-manfūsh. 6. Fa-'ammā man thaqulat mawāzīnuh. 7. Fahuwa fī 'īshatir rāḍiyah. 8. Wa 'ammā man khaffat mawāzīnuh. 9. Fa-'ummuhu hāwiyah. 10. Wa mā 'adrāka mā hiyah. 11. Nārun ḥāmiyah."},
+            { id: 101, title: "Al-Qari'ah (The Striking Calamity)", verse_count: 11, arabic_text: "ٱلْقَارِعَةُ (1) مَا ٱلْقَارِعَةُ (2) وَمَآ أَدْرَىٰكَ مَا ٱلْقَارِعَةُ (3) يَوْمَ يَكُونُ ٱلنَّاسُ كَٱلْفَرَاشِ ٱلْمَبْثُوثِ (4) وَتَكُونُ ٱلْجِبَالُ كَٱلْعِهْنِ ٱلْمَنفُوشِ (5) فَأَمَّا مَن ثَقُلَتْ مَوَٰزِينُهُۥ (6) فَهُوَ فِى عِيشَةٍۢ رَّاضِيَةٍۢ (7) وَأَمَّا مَن خَفَّتْ مَوَٰزِينُهُۥ (8) فَأُمُّهُۥ هَاوِيَةٌ (9) وَمَآ أَدْرَىٰكَ مَا هِيَهْ (10) نَارٌ حَامِيَةٌۢ (11)", summary: "Al-Qari'ah focuses entirely on the Day of Judgment, describing the terrifying sound and spectacle of the 'Striking Calamity.' It details how people will be scattered like moths and mountains like wool, and confirms that the fate of every soul will be determined by the heaviness or lightness of their scale of deeds.", translation: "1. The Striking Calamity - 2. What is the Striking Calamity? 3. And what can make you know what is the Striking Calamity? 4. It is the Day when people will be like scattered moths 5. And the mountains will be like carded wool. 6. Then as for he whose scales are heavy [with good deeds], 7. He will be in a pleasing life. 8. But as for he whose scales are light, 9. His refuge will be an abyss. 10. And what can make you know what that is? 11. It is a Fire, intensely hot.", transliteration: "1. Al-Qāri'ah. 2. Mal-Qāri'ah. 3. Wa mā 'adrāka mal-Qāri'ah. 4. Yawma yakūnun-nāsu kal-farāshil-mabthūth. 5. Wa takūnul-jibālu kal-'ihnil-manfūsh. 6. Fa-'ammā man thaqulat mawāzīnuh. 7. Fahuwa fī 'īshatir rāḍiyah. 8. Wa 'ammā man khaffat mawāzīnuh. 9. Fa-'ummuhu hāwiyah. 10. Wa mā 'adrāka mā hiyah. 11. Nārun ḥāmiyah."},
             { id: 102, title: "At-Takathur (Piling Up)", verse_count: 8, arabic_text: "أَلْهَىٰكُمُ ٱلتَّكَاثُرُ (1) حَتَّىٰ زُرْتُمُ ٱلْمَقَابِرَ (2) كَلَّا سَوْفَ تَعْلَمُونَ (3) ثُمَّ كَلَّا سَوْفَ تَعْلَمُونَ (4) كَلَّا لَوْ تَعْلَمُونَ عِلْمَ ٱلْيَقِينِ (5) لَتَرَوُنَّ ٱلْجَحِيمَ (6) ثُمَّ لَتَرَوُنَّهَا عَيْنَ ٱلْيَقِينِ (7) ثُمَّ لَتُسْـَٔلُنَّ يَوْمَئِذٍ عَنِ ٱلنَّعِيمِ (8)", summary: "At-Takathur condemns mankind's preoccupation with worldly competition in accumulating wealth and status, which distracts them from their true purpose until they face death. It warns of the certainty of the Hereafter and the accountability for all blessings enjoyed in this life.", translation: "1. Competition in [worldly] increase diverts you 2. Until you visit the graveyards. 3. No! You are going to know. 4. Then no! You are going to know. 5. No! If you only knew with knowledge of certainty - 6. You will surely see the Hellfire. 7. Then you will surely see it with the eye of certainty. 8. Then you will surely be asked on that Day about pleasure.", transliteration: "1. 'Alhākumut-takāthur. 2. Ḥattā zurtumul-maqābir. 3. Kallā sawfa ta'lamūn. 4. Thumma kallā sawfa ta'lamūn. 5. Kallā law ta'lamūna 'ilmal-yaqīn. 6. Latarawunnal-jaḥīm. 7. Thumma latarawunnahā 'aynal-yaqīn. 8. Thumma latus'alunna yawma'idhin 'anin-na'īm."},
             { id: 103, title: "Al-Asr (The Declining Day)", verse_count: 3, arabic_text: "وَٱلْعَصْرِ (1) إِنَّ ٱلْإِنسَٰنَ لَفِى خُسْرٍ (2) إِلَّا ٱلَّذِينَ ءَامَنُوا۟ وَعَمِلُوا۟ ٱلصَّٰلِحَٰتِ وَتَوَاصَوْا۟ بِٱلْحَقِّ وَتَوَاصَوْا۟ بِٱلصَّبْرِ (3)", summary: "Al-Asr emphasizes the crucial importance of time and states that all humanity is in a state of loss, except for those who fulfill four essential conditions: faith, righteous deeds, advising each other towards truth, and advising each other towards patience.", translation: "1. By the declining day, 2. Indeed, mankind is in loss, 3. Except for those who have believed and done righteous deeds and advised each other to truth and advised each other to patience.", transliteration: "1. Wal 'Aṣr. 2. Innal-Insāna lafī Khusr. 3. Illal-Ladhīna Āmanū wa 'Amilus-Sālihāati wa Tawāṣaw Bil-Ḥaqqi wa Tawāṣaw Biṣ-Ṣabr."},
             { id: 104, title: "Al-Humazah (The Backbiter)", verse_count: 9, arabic_text: "وَيْلٌ لِّكُلِّ هُمَزَةٍ لُّمَزَةٍ (1) ٱلَّذِى جَمَعَ مَالًا وَعَدَّدَهُۥ (2) يَحْسَبُ أَنَّ مَالَهُۥٓ أَخْلَدَهُۥ (3) كَلَّا ۖ لَيُنۢبَذَنَّ فِى ٱلْحُطَمَةِ (4) وَمَآ أَدْرَىٰكَ مَا ٱلْحُطَمَةُ (5) نَارُ ٱللَّهِ ٱلْمُوقَدَةُ (6) ٱلَّتِى تَطَّلِعُ عَلَى ٱلْأَفْـِٔدَةِ (7) إِنَّهَا عَلَيْهِم مُّؤْصَدَةٌ (8) فِى عَمَدٍۢ مُّمَدَّدَةٍۭ (9)", summary: "This Surah sternly warns those who are habitual slanderers and gather wealth, believing it will secure them immortality. It promises that such people will be cast into the crushing Fire (Al-Hutamah), which consumes both the body and the heart.", translation: "1. Woe to every scorner and mocker 2. Who collects wealth and [continuously] counts it. 3. He thinks that his wealth will make him immortal. 4. No! He will surely be thrown into the Crusher. 5. And what can make you know what is the Crusher? 6. [It is] the fire of Allah, kindled, 7. Which mounts up to the hearts. 8. Indeed, it will be closed down upon them 9. In extended columns.", transliteration: "1. Waylul li-kulli humazatil-lumazah. 2. Alladhī jama'a mālaw wa 'addadah. 3. Yaḥsabu 'anna mālahū 'akhladah. 4. Kallā layunbadhanna fil-ḥuṭamah. 5. Wa mā 'adrāka mal-ḥuṭamah. 6. Nārullāhil-mūqadah. 7. Allatī taṭṭali'u 'alal-'af'idah. 8. 'Innahā 'alayhim mu'ṣadah. 9. Fī 'amadin mumaddadah."},
             { id: 105, title: "Al-Fil (The Elephant)", verse_count: 5, arabic_text: "أَلَمْ تَرَ كَيْفَ فَعَلَ رَبُّكَ بِأَصْحَٰبِ ٱلْفِيلِ (1) أَلَمْ يَجْعَلْ كَيْدَهُمْ فِى تَضْلِيلٍ (2) وَأَرْسَلَ عَلَيْهِمْ طَيْرًا أَبَابِيلَ (3) تَرْمِيهِم بِحِجَارَةٍ مِّن سِجِّيلٍ (4) فَجَعَلَهُمْ كَعَصْفٍ مَّأْكُولٍۭ (5)", summary: "This Surah recounts the historical event when God protected the Kaaba in Mecca from the invasion of the Abyssinian army led by Abraha, who had war elephants. The army was destroyed by flocks of birds (Ababeel) carrying small stones.", translation: "1. Have you not considered, [O Muḥammad], how your Lord dealt with the companions of the elephant? 2. Did He not make their plan into misguidance? 3. And He sent against them birds in flocks, 4. Striking them with stones of hard clay, 5. And He made them like an ingested crop.", transliteration: "1. 'Alam tara kayfa fa'ala Rabbuka bi'aṣḥābil-Fīl. 2. 'Alam yaj'al kaydahum fī taḍlīl. 3. Wa 'arsala 'alayhim ṭayran 'abābīl. 4. Tarmīhim biḥijāratin min Sijjīl. 5. Faja'alahum ka'aṣfin ma'kūl."},
             { id: 106, title: "Quraysh (Quraysh)", verse_count: 4, arabic_text: "لِإِيلَٰفِ قُرَيْشٍ (1) إِيلَٰفِهِمْ رِحْلَةَ ٱلشِّتَآءِ وَٱلصَّيْفِ (2) فَلْيَعْبُدُوا۟ رَبَّ هَٰذَا ٱلْبَيْتِ (3) ٱلَّذِىٓ أَطْعَمَهُم مِّن جُوعٍۢ وَءَامَنَهُم مِّنْ خَوْفٍۭ (4)", summary: "Quraysh reminds the Quraysh tribe of Mecca (the guardians of the Kaaba) of the great favors God bestowed upon them, specifically the security and ease of travel they enjoyed during their winter and summer trade journeys, and calls them to worship the Lord of the Kaaba in gratitude.", translation: "1. For the accustomed security of [the tribe of] Quraysh - 2. Their accustomed security [in] the caravan of winter and summer - 3. Let them worship the Lord of this House, 4. Who has fed them, [saving them] from hunger and made them safe, [saving them] from fear.", transliteration: "1. Li-'īlāfi Quraysh. 2. 'Īlāfihim riḥlatash-shitā'i waṣ-ṣayf. 3. Fal-ya'budū Rabba hādhal-bayt. 4. Alladhī 'aṭ'amahum min jū'iw wa 'āmanahum min khawf."},
-            { id: 107, title: "Al-Ma'un (The Small Kindnesses)", verse_count: 7, arabic_text: "أَرَءَيْتَ ٱلَّذِى يُكَذِّبُ بِٱلدِّينِ (1) فَذَٰلِكَ ٱلَّذِى يَدُعُّ ٱلْيَتِيمَ (2) وَلَا يَحُضُّ عَلَىٰ طَعَامِ ٱلْمِسْكِينِ (3) فَوَيْلٌ لِّلْمُصَلِّينَ (4) ٱلَّذِينَ هُمْ عَن صَلَاتِهِمْ سَاهُونَ (5) ٱلَّذِينَ هُمْ يُرَآءُونَ (6) وَيَمْنَعُونَ ٱلْمَاعُونَ (7)", summary: "Al-Ma'un condemns those who deny the Day of Recompense, highlighting their lack of compassion by harshly driving away orphans and failing to encourage the feeding of the poor. It then warns those who are negligent in their prayer, show off their good deeds, and withhold simple acts of charity.", translation: "1. Have you seen the one who denies the Recompense? 2. For that is the one who drives away the orphan 3. And does not encourage the feeding of the poor. 4. So woe to those who pray 5. [But] who are heedless of their prayer - 6. Those who make show [of their deeds] 7. And withhold [simple] assistance.", transliteration: "1. 'A-ra'aytalladhī yukadhdhibu bid-dīn. 2. Fadhālikalladhī yadu'ul-yatīm. 3. Wa lā yaḥuḍḍu 'alā ṭa'āmil-miskīn. 4. Fa-waylul lil-muṣallīn. 5. Alladhīna hum 'an ṣalātihim sāhūn. 6. Alladhīna hum yurā'ūn. 7. Wa yamna'ūnal-mā'ūn."},
+            { id: 107, title: "Al-Ma'un (The Small Kindnesses)", verse_count: 7, arabic_text: "أَرَءَيْتَ ٱلَّذِى يُكَذِّبُ بِٱلدِّينِ (1) فَذَٰلِكَ ٱلَّذِى يَدُعُّ ٱلْيَتِيمَ (2) وَلَا يَحُضُّ عَلَىٰ طَعَامِ ٱلْمِسْكِينِ (3) فَوَيْلٌ لِّلْمُصَلِّينَ (4) ٱلَّذِينَ هُمْ عَن صَلَاتِهِمْ سَاهُونَ (5) ٱلَّذِينَ هُمْ يُرَآءُونَ (6) وَيَمْنَعُونَ ٱٱلْمَاعُونَ (7)", summary: "Al-Ma'un condemns those who deny the Day of Recompense, highlighting their lack of compassion by harshly driving away orphans and failing to encourage the feeding of the poor. It then warns those who are negligent in their prayer, show off their good deeds, and withhold simple acts of charity.", translation: "1. Have you seen the one who denies the Recompense? 2. For that is the one who drives away the orphan 3. And does not encourage the feeding of the poor. 4. So woe to those who pray 5. [But] who are heedless of their prayer - 6. Those who make show [of their deeds] 7. And withhold [simple] assistance.", transliteration: "1. 'A-ra'aytalladhī yukadhdhibu bid-dīn. 2. Fadhālikalladhī yadu'ul-yatīm. 3. Wa lā yaḥuḍḍu 'alā ṭa'āmil-miskīn. 4. Fa-waylul lil-muṣallīn. 5. Alladhīna hum 'an ṣalātihim sāhūn. 6. Alladhīna hum yurā'ūn. 7. Wa yamna'ūnal-mā'ūn."},
             { id: 108, title: "Al-Kawthar (The Abundance)", verse_count: 3, arabic_text: "إِنَّآ أَعْطَيْنَٰكَ ٱلْكَوْثَرَ (1) فَصَلِّ لِرَبِّكَ وَٱنْحَرْ (2) إِنَّ شَانِئَكَ هُوَ ٱلْأَبْتَرُ (3)", summary: "Al-Kawthar provides great comfort and reassurance to the Prophet Muhammad (peace be upon him), confirming that God has granted him immense abundance (Al-Kawthar). It instructs him to turn to God in prayer and sacrifice, and promises that his critic will be cut off (abtar).", translation: "1. Indeed, We have granted you, [O Muḥammad], al-Kawthar. 2. So pray to your Lord and sacrifice [to Him alone]. 3. Indeed, your enemy is the one cut off.", transliteration: "1. 'Innā 'a'ṭaynākal-Kawthar. 2. Faṣalli li-Rabbika wanḥar. 3. 'Inna shāni'aka huwal-'abtar."},
             { id: 109, title: "Al-Kafirun (The Disbelievers)", verse_count: 6, arabic_text: "قُلْ يَٰٓأَيُّهَا ٱلْكَٰفِرُونَ (1) لَآ أَعْبُدُ مَا تَعْبُدُونَ (2) وَلَآ أَنتُمْ عَٰبِدُونَ مَآ أَعْبُدُ (3) وَلَآ أَنَا۠ عَابِدٌ مَّا عَبَدتُّمْ (4) وَلَآ أَنتُمْ عَٰبِدُونَ مَآ أَعْبُدُ (5) لَكُمْ دِينُكُمْ وَلِىَ دِينِ (6)", summary: "Al-Kafirun clearly establishes the demarcation between the worship of Muslims and the polytheistic practices of the disbelievers. It is a foundational chapter defining the principle of religious freedom and affirming the exclusive nature of Islamic monotheism.", translation: "1. Say, 'O disbelievers, 2. I do not worship what you worship. 3. Nor are you worshippers of what I worship. 4. Nor will I be a worshipper of what you worship. 5. Nor will you be worshippers of what I worship. 6. For you is your religion, and for me is my religion.'", transliteration: "1. Qul yā 'ayyuhal-kāfirūn. 2. Lā 'a'budu mā ta'budūn. 3. Wa lā 'antum 'ābidūna mā 'a'bud. 4. Wa lā 'ana 'ābidum mā 'abadtum. 5. Wa lā 'antum 'ābidūna mā 'a'bud. 6. Lakum dīnukum wa liya dīn."},
             { id: 110, title: "An-Nasr (The Divine Support)", verse_count: 3, arabic_text: "إِذَا جَاءَ نَصْرُ ٱللَّهِ وَٱلْفَتْحُ (1) وَرَأَيْتَ ٱلنَّاسَ يَدْخُلُونَ فِى دِينِ ٱللَّهِ أَفْوَاجًا (2) فَسَبِّحْ بِحَمْدِ رَبِّكَ وَٱسْتَغْفِرْهُ ۚ إِنَّهُۥ كَانَ تَوَّابًۢا (3)", summary: "An-Nasr, revealed near the end of the Prophet Muhammad's life, foretells the conquest of Mecca and the widespread acceptance of Islam. It instructs believers to celebrate this victory by praising God and seeking His forgiveness.", translation: "1. When the victory of Allah has come and the conquest, 2. And you see the people entering into the religion of Allah in multitudes, 3. Then exalt [Him] with praise of your Lord and ask forgiveness of Him. Indeed, He is ever Accepting of repentance.", transliteration: "1. Idhā jā'a naṣru Allāhi wal-fatḥ. 2. Wa ra'aytan-nāsa yadkhulūna fī dīni Allāhi afwājā. 3. Fa-sabbiḥ biḥamdi Rabbika wa astaghfirhu, innahu kāna tawwābā."},
@@ -129,11 +125,6 @@
         let currentActiveButton = null;
         let selectedSurahId = null; 
 
-        // --- Firebase Setup (Required Global Variables) ---
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-        
         // --- UI Rendering and Selection Logic ---
 
         /**
@@ -149,9 +140,9 @@
             sortedSurahs.forEach(item => {
                 const button = document.createElement('button');
                 button.id = `item-${item.id}`;
-                // Using a neutral background color that works with the paper theme
-                button.className = 'w-full text-left p-3 my-1 rounded-lg transition-all duration-200 ease-in-out hover:bg-indigo-200 hover:text-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-default bg-paper-light shadow-sm flex justify-between items-center border border-transparent hover:border-indigo-300';
-                button.innerHTML = `<span><span class="font-bold text-indigo-700 mr-2">${item.id}.</span> ${item.title}</span> <span class="text-xs font-mono bg-pecan px-2 py-1 rounded-full text-default">${item.verse_count} Vs</span>`;
+                // Styles updated for black/paper theme
+                button.className = 'w-full text-left p-3 my-1 rounded-lg transition-all duration-200 ease-in-out hover:bg-indigo-200 hover:text-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-default bg-paper-light shadow-sm flex justify-between items-center border border-gray-400';
+                button.innerHTML = `<span><span class="font-bold mr-2">${item.id}.</span> ${item.title}</span> <span class="text-xs font-mono bg-pecan px-2 py-1 rounded-full text-default">${item.verse_count} Vs</span>`;
                 button.onclick = () => selectItem(item.id, button);
                 listContainer.appendChild(button);
             });
@@ -165,12 +156,11 @@
             if (!item) return;
 
             selectedSurahId = id; 
-            document.getElementById('send-query-btn').disabled = false;
             
             // --- Content Generation (English Only) ---
             const contentHTML = `
-                <div class="p-4 bg-pecan border-l-4 border-indigo-500 rounded-r-lg shadow-md text-default">
-                    <h3 class="text-xl font-bold text-indigo-800">Summary (English)</h3>
+                <div class="p-4 bg-pecan border-l-4 border-gray-500 rounded-r-lg shadow-md text-default">
+                    <h3 class="text-xl font-bold">Summary (English)</h3>
                     <p class="mt-2">${item.summary}</p>
                 </div>
 
@@ -199,109 +189,17 @@
 
             // --- UI Focus Management ---
             if (currentActiveButton) {
-                currentActiveButton.classList.remove('bg-indigo-600', 'text-white', 'shadow-md', 'font-semibold', 'text-indigo-900');
-                currentActiveButton.classList.add('bg-paper-light', 'text-default');
+                // Remove active classes using the custom class for black/paper theme
+                currentActiveButton.classList.remove('active-surah');
+                currentActiveButton.classList.remove('bg-e5e5e5', 'text-default'); 
+                currentActiveButton.classList.add('bg-paper-light');
             }
 
             // Set the newly active button's style
-            clickedButton.classList.remove('bg-paper-light', 'text-default');
-            clickedButton.classList.add('bg-indigo-600', 'text-white', 'shadow-lg', 'font-semibold');
+            clickedButton.classList.remove('bg-paper-light');
+            clickedButton.classList.add('active-surah'); // Use a custom class for styling
             
             currentActiveButton = clickedButton;
-        }
-
-        // --- AI Study Assistant (Gemini API) Logic ---
-
-        const apiKey = ""; 
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-
-        // Utility function for exponential backoff retry logic
-        async function fetchWithRetry(url, options, maxRetries = 5) {
-            for (let i = 0; i < maxRetries; i++) {
-                try {
-                    const response = await fetch(url, options);
-                    if (response.ok) {
-                        return response;
-                    } else if (response.status === 429) {
-                        const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                    } else {
-                        const error = await response.json();
-                        throw new Error(`API error: ${response.status} - ${error.error.message}`);
-                    }
-                } catch (error) {
-                    if (i === maxRetries - 1) {
-                        throw error;
-                    }
-                }
-            }
-        }
-
-        /**
-         * Sends the user's query to the Gemini model for detailed study assistance.
-         */
-        async function sendQuery() {
-            const inputElement = document.getElementById('user-query-input');
-            const query = inputElement.value.trim();
-            const outputElement = document.getElementById('chat-output');
-            const sendButton = document.getElementById('send-query-btn');
-            const surah = surahData.find(d => d.id === selectedSurahId);
-
-            if (!query || !surah) return;
-
-            // Display user message
-            outputElement.innerHTML += `<div class="p-2 bg-indigo-100 border-l-2 border-indigo-500 rounded-r-lg text-default"><strong>You:</strong> ${query}</div>`;
-            outputElement.scrollTop = outputElement.scrollHeight;
-
-            // Set loading state
-            const loadingMessage = document.createElement('div');
-            loadingMessage.id = 'loading-msg';
-            loadingMessage.className = 'p-2 text-sm text-gray-500 italic flex items-center gap-2 text-default';
-            loadingMessage.innerHTML = 'AI Assistant is thinking... <svg class="animate-spin h-4 w-4 text-indigo-500" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
-            outputElement.appendChild(loadingMessage);
-            outputElement.scrollTop = outputElement.scrollHeight;
-            
-            sendButton.disabled = true;
-            inputElement.disabled = true;
-            inputElement.value = '';
-
-            try {
-                // Construct a detailed system instruction for contextual grounding
-                const systemPrompt = `You are a helpful, knowledgeable, and respectful Quranic Study Assistant. The user is asking about Surah ${surah.title} (Surah ${surah.id}), which has ${surah.verse_count} verses. The English summary is: ${surah.summary}. The Arabic text is: ${surah.arabic_text}. Answer the user's query in a concise and informative manner. Use Google Search for current, relevant external information to ground your answer. Do not include the Surah text in your response.`;
-                
-                const payload = {
-                    contents: [{ parts: [{ text: query }] }],
-                    tools: [{ "google_search": {} }],
-                    systemInstruction: {
-                        parts: [{ text: systemPrompt }]
-                    },
-                };
-
-                const response = await fetchWithRetry(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await response.json();
-                const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response. Please try rephrasing your question.";
-                
-                // Remove loading message
-                document.getElementById('loading-msg')?.remove();
-
-                // Display AI response
-                outputElement.innerHTML += `<div class="p-2 bg-gray-200 border-l-2 border-gray-500 rounded-r-lg text-default"><strong>AI Assistant:</strong> ${text}</div>`;
-                outputElement.scrollTop = outputElement.scrollHeight;
-
-            } catch (error) {
-                console.error("Gemini API Error:", error);
-                document.getElementById('loading-msg')?.remove();
-                outputElement.innerHTML += `<div class="p-2 text-red-700 bg-red-100 border-l-2 border-red-500 rounded-r-lg text-default"><strong>Error:</strong> Failed to connect to the AI assistant. Please check the console for details.</div>`;
-            } finally {
-                sendButton.disabled = false;
-                inputElement.disabled = false;
-                inputElement.focus();
-            }
         }
 
         // --- Initialization ---
@@ -313,7 +211,6 @@
                 // Select the first item and initiate the content view
                 selectItem(1, firstButton); 
                 selectedSurahId = 1;
-                document.getElementById('send-query-btn').disabled = false;
             }
         };
     </script>
